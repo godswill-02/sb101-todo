@@ -4,9 +4,13 @@ import com.springboot101.todo.auth.dtos.LoginDto;
 import com.springboot101.todo.auth.dtos.RegisterDto;
 import com.springboot101.todo.auth.dtos.TokenResponseDto;
 import com.springboot101.todo.auth.service.AuthService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.springboot101.todo.users.dtos.UserResponseDto;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
 
 /**
  * @author Mr Uche.
@@ -21,13 +25,30 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping(path = "login")
-    public TokenResponseDto login(LoginDto loginDto) {
-        return authService.login(loginDto);
+    @PostMapping(path = "/login")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
+        try {
+            TokenResponseDto token = authService.login(loginDto);
+            return ResponseEntity.ok(token);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(e.getMessage());
+        }
     }
 
-    @PostMapping(path = "register")
-    public TokenResponseDto register(RegisterDto registerDto) {
-        return authService.register(registerDto);
+
+    @PostMapping(path = "/register")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<?> register(@RequestBody RegisterDto registerDto) {
+        try {
+            UserResponseDto user = authService.register(registerDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(user);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
+
 }

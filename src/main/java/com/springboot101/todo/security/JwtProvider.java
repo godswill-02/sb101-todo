@@ -3,7 +3,9 @@ package com.springboot101.todo.security;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
 import lombok.Getter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -19,8 +21,10 @@ import java.util.Date;
  */
 @Component
 public class JwtProvider {
-    private final SecretKey jwtSecret = Jwts.SIG.HS512.key().build();
-    @Getter
+    private final SecretKey jwtSecret;
+    public JwtProvider(@Value("${application.security.jwt.secret-key}") String secret) {
+        this.jwtSecret = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
+    }    @Getter
     private final int jwtExpirationMs = 86400000;
 
     public String generateToken(Authentication authentication) {
